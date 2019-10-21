@@ -60,6 +60,17 @@ cp build/maixpy.bin $release_dir/maixpy_${version}_m5stickv.bin
 cp build/maixpy.elf $release_dir/elf/maixpy_${version}_m5stickv.elf
 cd ..
 
+#
+cd maixpy_ttgo
+echo "-------------------"
+echo "build project maixpy_ttgo"
+echo "-------------------"
+python project.py distclean
+python project.py build
+cp build/maixpy.bin $release_dir/maixpy_${version}_ttgo.bin
+cp build/maixpy.elf $release_dir/elf/maixpy_${version}_ttgo.elf
+cd ..
+
 cd $release_dir
 7z a elf_maixpy_${version}.7z elf/*
 rm -rf elf
