@@ -108,10 +108,10 @@ extern const struct _mp_print_t mp_debug_print;
 #define MICROPY_GC_ALLOC_THRESHOLD                (1)
 #define MICROPY_PY_GC_COLLECT_RETVAL              (0)
 
-#define MICROPY_MEM_STATS                         (1)
+#define MICROPY_MEM_STATS                         (0)
 #define MICROPY_DEBUG_PRINTERS                    (0)
 #define MICROPY_REPL_EVENT_DRIVEN                 (0)
-#define MICROPY_MALLOC_USES_ALLOCATED_SIZE        (1)
+#define MICROPY_MALLOC_USES_ALLOCATED_SIZE        (0)
 #define MICROPY_HELPER_REPL                       (1)
 #define MICROPY_HELPER_LEXER_UNIX                 (1)
 #define MICROPY_ENABLE_SOURCE_LINE                (1)
@@ -317,12 +317,14 @@ extern const struct _mp_obj_module_t nes_module;
 #endif
 
 // lvgl GUI lib
-#ifndef CONFIG_MAIXPY_LVGL_ENABLE
-#define CONFIG_MAIXPY_LVGL_ENABLE           (0) // lvgl GUI lib
-#endif
-#if CONFIG_MAIXPY_LVGL_ENABLE
-#undef CONFIG_MAIXPY_LVGL_ENABLE
-#define CONFIG_MAIXPY_LVGL_ENABLE           (1) // lvgl GUI lib
+#ifdef CONFIG_MAIXPY_LVGL_ENABLE
+// #define CONFIG_MAIXPY_LVGL_ENABLE           (0) // lvgl GUI lib
+// #endif
+// #if CONFIG_MAIXPY_LVGL_ENABLE
+
+#include "../src/lvgl/lv_bindings/lvgl/src/lv_misc/lv_gc.h"
+// #undef CONFIG_MAIXPY_LVGL_ENABLE
+// #define CONFIG_MAIXPY_LVGL_ENABLE           (1) // lvgl GUI lib
 extern const struct _mp_obj_module_t mp_module_lvgl;
 extern const struct _mp_obj_module_t mp_module_lvgl_helper;
 #define MAIXPY_PY_LVGL_DEF \
@@ -330,6 +332,7 @@ extern const struct _mp_obj_module_t mp_module_lvgl_helper;
     { MP_OBJ_NEW_QSTR(MP_QSTR_lvgl_helper), (mp_obj_t)&mp_module_lvgl_helper },
 #else
 #define MAIXPY_PY_LVGL_DEF
+#define LV_ROOTS
 #endif // CONFIG_MAIXPY_LVGL_ENABLE
 
 // touchscreen
@@ -437,6 +440,8 @@ extern const struct _mp_obj_module_t mp_module_touchscreen;
 
 
 #define MICROPY_PORT_ROOT_POINTERS \
+    LV_ROOTS \
+    void *mp_lv_user_data; \
     const char *readline_hist[16];  \
     struct _machine_uart_obj_t *Maix_stdio_uart; \
 	struct _nic_obj_t *modnetwork_nic; \

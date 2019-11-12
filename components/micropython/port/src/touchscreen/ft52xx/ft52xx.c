@@ -21,6 +21,15 @@ static uint8_t ft52xx_read(uint8_t cmd, uint8_t *buff, size_t len)
     return 1;
 }
 
+static long map(long x, long in_min, long in_max, long out_min, long out_max)
+{
+    long divisor = (in_max - in_min);
+    if (divisor == 0) {
+        return -1;
+    }
+    return (x - in_min) * (out_max - out_min) / divisor + out_min;
+}
+
 int ts_ft52xx_poll(ts_ft52xx_pdata_t *pdata)
 {
     int x = 0, y = 0;
@@ -42,6 +51,8 @@ int ts_ft52xx_poll(ts_ft52xx_pdata_t *pdata)
         y = buff[TOUCH1_YH + i * 6] & 0x0F;
         y <<= 8;
         y |= buff[TOUCH1_YL + i * 6];
+        x = map(x, 0, 320, 0, 240);
+        y = map(y, 0, 320, 0, 240);
     }
 
     if (!pdata->press) {
@@ -49,7 +60,7 @@ int ts_ft52xx_poll(ts_ft52xx_pdata_t *pdata)
         pdata->event->type = TOUCH_BEGIN;
     } else if (pdata->event->x != x || pdata->event->y != y) {
         pdata->event->type = TOUCH_MOVE;
-    }else{
+    } else {
         pdata->event->type = TOUCH_BEGIN;
     }
     pdata->event->x = x;

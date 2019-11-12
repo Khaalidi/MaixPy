@@ -296,7 +296,15 @@ if(CONFIG_COMPONENT_MICROPYTHON_ENABLE)
         set_property(SOURCE ${LVGL_MPY_GEN_SRC} PROPERTY GENERATED 1)
         
         set(lvgl_gen_py_tool ${mpy_port_dir}/src/lvgl/lv_bindings/gen/gen_mpy.py)
+
+        if(CONFIG_BOARD_TTGO_TWATCH)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DLV_CONF_H=1 -DLV_CONF_INCLUDE_SIMPLE -DLV_COLOR_16_SWAP=1")
+        else()
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DLV_CONF_H=1 -DLV_CONF_INCLUDE_SIMPLE")
+        endif()
+        
+        append_srcs_dir(ADD_SRCS "port/src/lvgl")
+
     else()
         set(LVGL_MPY_GEN_SRC "")
     endif()
@@ -329,8 +337,9 @@ if(CONFIG_COMPONENT_MICROPYTHON_ENABLE)
                     DEPENDS ${lvgl_core_header}
                     )
         add_custom_command(OUTPUT ${LVGL_MPY_GEN_SRC}
-                    COMMAND ${python} ${lvgl_gen_py_tool} ${cmd_param_cinclude} -M maixpy -MP maix -E ${LVGL_MPY_GEN_SRC_PP} ${lvgl_core_header} > ${LVGL_MPY_GEN_SRC}
-                    DEPENDS ${LVGL_MPY_GEN_SRC_PP}
+        # COMMAND ${python} ${lvgl_gen_py_tool} ${cmd_param_cinclude} -M maixpy -MP maix -E ${LVGL_MPY_GEN_SRC_PP} ${lvgl_core_header} > ${LVGL_MPY_GEN_SRC}
+        COMMAND ${python} ${lvgl_gen_py_tool} ${cmd_param_cinclude} -M lvgl -MP lv -E ${LVGL_MPY_GEN_SRC_PP} ${lvgl_core_header} > ${LVGL_MPY_GEN_SRC}
+        DEPENDS ${LVGL_MPY_GEN_SRC_PP}
                 )
     endif()
     #############################################

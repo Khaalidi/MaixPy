@@ -84,21 +84,21 @@ typedef int16_t lv_coord_t;
 #else       /*LV_MEM_CUSTOM*/
 #  define LV_MEM_CUSTOM_INCLUDE "lv_mp_mem_custom_include.h"   /*Header for the dynamic memory function*/
 #  define LV_MEM_CUSTOM_ALLOC     m_malloc       /*Wrapper to malloc*/
-#  define LV_MEM_CUSTOM_FREE(p)   m_free(p, gc_nbytes(p))   /*Wrapper to free*/
+#  define LV_MEM_CUSTOM_FREE   m_free   /*Wrapper to free*/
 #endif     /*LV_MEM_CUSTOM*/
 
 /* Garbage Collector settings
  * Used if lvgl is binded to higher level language and the memory is managed by that language */
-#define LV_ENABLE_GC 0 /* Enable GC for Micropython */
+#define LV_ENABLE_GC 1 /* Enable GC for Micropython */
 #if LV_ENABLE_GC != 0
-// #  define LV_GC_INCLUDE "py/mpstate.h"
-// #  define LV_MEM_CUSTOM_REALLOC   m_realloc      /*Wrapper to realloc*/
-// #  define LV_MEM_CUSTOM_GET_SIZE  gc_nbytes      /*Wrapper to lv_mem_get_size*/
-// #  define LV_GC_ROOT(x) MP_STATE_PORT(x)
-#   define LV_MEM_CUSTOM_REALLOC(p, size)   m_realloc(p, gc_nbytes(p), size) /*Wrapper to realloc*/
-#   define LV_MEM_CUSTOM_GET_SIZE  gc_nbytes                                 /*Wrapper to lv_mem_get_size*/
-#   define LV_GC_INCLUDE "lvgl_port.h"
-#   define LV_GC_ROOT(x) LVGL_STATE_GC(x)
+#  define LV_GC_INCLUDE "py/mpstate.h"
+#  define LV_MEM_CUSTOM_REALLOC   m_realloc      /*Wrapper to realloc*/
+#  define LV_MEM_CUSTOM_GET_SIZE  gc_nbytes      /*Wrapper to lv_mem_get_size*/
+#  define LV_GC_ROOT(x) MP_STATE_PORT(x)
+// #   define LV_MEM_CUSTOM_REALLOC(p, size)   m_realloc(p, gc_nbytes(p), size) /*Wrapper to realloc*/
+// #   define LV_MEM_CUSTOM_GET_SIZE  gc_nbytes                                 /*Wrapper to lv_mem_get_size*/
+// #   define LV_GC_INCLUDE "lvgl_port.h"
+// #   define LV_GC_ROOT(x) LVGL_STATE_GC(x)
 #endif /* LV_ENABLE_GC */
 
 /*=======================

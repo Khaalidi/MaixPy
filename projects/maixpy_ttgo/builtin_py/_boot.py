@@ -51,6 +51,13 @@ from board import board_info
 from fpioa_manager import fm
 from pye_mp import pye
 from Maix import FPIOA, GPIO
+from machine import I2C
+import axp202
+
+i2c = I2C(I2C.I2C0, freq=400000, scl=30, sda=31)
+p = axp202.PMU(i2c,0x34)
+p.setLDO2Voltage(1800)
+p.enablePower(axp202.AXP192_LDO2)
 
 
 # detect boot.py
@@ -106,4 +113,3 @@ print(banner)
 # run boot.py
 with open("boot.py") as f:
     exec(f.read())
-

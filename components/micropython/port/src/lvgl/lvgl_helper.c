@@ -9,8 +9,7 @@
 #include "touchscreen.h"
 
 
-typedef struct mp_ptr_t
-{
+typedef struct mp_ptr_t {
     mp_obj_base_t base;
     void *ptr;
 } mp_ptr_t;
@@ -46,34 +45,26 @@ STATIC const mp_ptr_t PTR_OBJ(ptr_global) = {\
 }
 
 
-STATIC void lcd_fill(int32_t x1, int32_t y1, int32_t x2, int32_t y2, lv_color_t color)
-{
-	lcd_fill_rectangle(x1, y1, x2, y2, color.full);
-}
 
-
-STATIC void lcd_flush(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t * color_map)
+STATIC void lcd_flush(struct _disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 {
-	int32_t w = x2-x1+1;
-	int32_t h = y2-y1+1;
-	int32_t x,y;
-	int32_t i=0;
-	uint16_t* data = malloc( w*h*2 );
-	uint16_t* pixels = data;
-	if(!data)
-		mp_raise_OSError(MP_ENOMEM);
-	for(y=y1; y<=y2; ++y)
-	{
-		for(x=x1; x<=x2; ++x)
-		{
-			pixels[i++]= (color_map->red<<3) | (color_map->blue<<8) | (color_map->green>>3&0x07 | color_map->green<<13);
-			// or LV_COLOR_16_SWAP = 1
-			 ++color_map;
-		}
-	}
-	lcd_draw_picture(x1, y1, w, h, (uint32_t*)data);
-	free(data);
-	lv_flush_ready();
+    int32_t w = area->x2 - area->x1 + 1;
+    int32_t h = area->y2 - area->y1 + 1;
+    int32_t x, y;
+    int32_t i = 0;
+    uint16_t *data = malloc( w * h * 2 );
+    uint16_t *pixels = data;
+    if (!data)
+        mp_raise_OSError(MP_ENOMEM);
+    for (y = area->y1; y <= area->y2; ++y) {
+        for (x = area->x1; x <= area->x2; ++x) {
+            data[i] = color_p[i].full;
+            i++;
+        }
+    }
+    lcd_draw_picture(area->x1, area->y1, w, h, (uint32_t *)data);
+    free(data);
+    lv_disp_flush_ready(disp_drv);
 }
 
 
@@ -82,13 +73,15 @@ STATIC void lcd_flush(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_c
  * @param data store the mouse data here
  * @return false: because the points are not buffered, so no more data to be read
  */
-bool mouse_read(lv_indev_data_t * data)
+STATIC bool mouse_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
 {
-	int ret, status, x, y;
-	if(!touchscreen_is_init())
-	{
-		touchscreen_config_t config;
-		config.i2c = NULL;
+    int ret, status, x = 0, y = 0;
+    if (!touchscreen_is_init()) {
+#ifdef CONFIG_BOARD_TTGO_TWATCH
+        mp_raise_OSError(MP_EINTR);
+#else
+        touchscreen_config_t config;
+        config.i2c = NULL;
         config.calibration[0] = -6;
         config.calibration[1] = -5941;
         config.calibration[2] = 22203576;
@@ -96,44 +89,43 @@ bool mouse_read(lv_indev_data_t * data)
         config.calibration[4] = -8;
         config.calibration[5] = -700369;
         config.calibration[6] = 65536;
-		ret = touchscreen_init((void*)&config);
-		if( ret != 0)
-			mp_raise_OSError(ret);
-	}
-	ret = touchscreen_read(&status, &x, &y);
-	if(ret != 0)
-		mp_raise_OSError(ret);
+        ret = touchscreen_init((void *)&config);
+        if ( ret != 0)
+            mp_raise_OSError(ret);
+#endif
+    }
+    ret = touchscreen_read(&status, &x, &y);
+    if (ret != 0)
+        mp_raise_OSError(ret);
     /*Store the collected data*/
-	switch(status)
-	{
-		case TOUCHSCREEN_STATUS_RELEASE:
-    		data->state =  LV_INDEV_STATE_REL;
-			break;
-		case TOUCHSCREEN_STATUS_PRESS:
-		case TOUCHSCREEN_STATUS_MOVE:
-			data->state = LV_INDEV_STATE_PR;
-			break;
-		default:
-			return false;
-	}
+    switch (status) {
+    case TOUCHSCREEN_STATUS_RELEASE:
+        data->state =  LV_INDEV_STATE_REL;
+        break;
+    case TOUCHSCREEN_STATUS_PRESS:
+    case TOUCHSCREEN_STATUS_MOVE:
+        data->state = LV_INDEV_STATE_PR;
+        break;
+    default:
+        return false;
+    }
     data->point.x = x;
     data->point.y = y;
     return false;
 }
 
 
-DEFINE_PTR_OBJ(lcd_fill);
+// DEFINE_PTR_OBJ(lcd_fill);
 DEFINE_PTR_OBJ(lcd_flush);
 DEFINE_PTR_OBJ(mouse_read);
 
 
 STATIC const mp_rom_map_elem_t lvgl_helper_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_lvgl_helper) },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_fill), MP_ROM_PTR(&PTR_OBJ(lcd_fill)) },
+    // { MP_OBJ_NEW_QSTR(MP_QSTR_fill), MP_ROM_PTR(&PTR_OBJ(lcd_fill)) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_flush), MP_ROM_PTR(&PTR_OBJ(lcd_flush)) },
-	{ MP_OBJ_NEW_QSTR(MP_QSTR_read), MP_ROM_PTR(&PTR_OBJ(mouse_read))},
+    { MP_OBJ_NEW_QSTR(MP_QSTR_read), MP_ROM_PTR(&PTR_OBJ(mouse_read))},
 };
-
 
 STATIC MP_DEFINE_CONST_DICT (
     mp_module_lvgl_helper_globals,
@@ -142,6 +134,6 @@ STATIC MP_DEFINE_CONST_DICT (
 
 const mp_obj_module_t mp_module_lvgl_helper = {
     .base = { &mp_type_module },
-    .globals = (mp_obj_dict_t*)&mp_module_lvgl_helper_globals
+    .globals = (mp_obj_dict_t *) &mp_module_lvgl_helper_globals
 };
 
