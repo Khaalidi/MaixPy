@@ -478,6 +478,32 @@ STATIC mp_obj_t py_lcd_freq(size_t n_args, const mp_obj_t *pos_args)
 	return mp_obj_new_int(freq);
 }
 
+STATIC mp_obj_t py_lcd_write_command(size_t n_args, const mp_obj_t *pos_args)
+{
+	mp_int_t cmd ;
+	if(n_args == 1)
+	{
+		cmd =  mp_obj_get_int(pos_args[0]);
+		lcd_write_command_byte(cmd);
+	}else{
+		mp_raise_ValueError("Only can write one byte");
+	}
+	return mp_const_none;
+}
+
+STATIC mp_obj_t py_lcd_write_data(size_t n_args, const mp_obj_t *pos_args)
+{
+	mp_int_t data ;
+	if(n_args == 1)
+	{
+		data =  mp_obj_get_int(pos_args[0]);
+		lcd_write_data_byte(data);
+	}else{
+		mp_raise_ValueError("Only can write one byte");
+	}
+	return mp_const_none;
+}
+
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_lcd_init_obj, 0, py_lcd_init);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(py_lcd_deinit_obj, py_lcd_deinit);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(py_lcd_width_obj, py_lcd_width);
@@ -492,6 +518,10 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(py_lcd_direction_obj, py_lcd_direction);
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(py_lcd_rotation_obj, 0, 1, py_lcd_rotation);
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(py_lcd_invert_obj, 0, 1, py_lcd_invert);
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(py_lcd_draw_string_obj, 3, 5, py_lcd_draw_string);
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(py_lcd_cmd_obj, 0, 1, py_lcd_write_command);
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(py_lcd_data_obj, 0, 1, py_lcd_write_data);
+
 static const mp_map_elem_t globals_dict_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__),        MP_OBJ_NEW_QSTR(MP_QSTR_lcd) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_init),            (mp_obj_t)&py_lcd_init_obj          },
@@ -508,6 +538,11 @@ static const mp_map_elem_t globals_dict_table[] = {
 	{ MP_OBJ_NEW_QSTR(MP_QSTR_rotation),        (mp_obj_t)&py_lcd_rotation_obj     },
 	{ MP_OBJ_NEW_QSTR(MP_QSTR_mirror),          (mp_obj_t)&py_lcd_invert_obj     },
 	{ MP_OBJ_NEW_QSTR(MP_QSTR_draw_string),     (mp_obj_t)&py_lcd_draw_string_obj   },
+
+	//! low level api
+	{ MP_OBJ_NEW_QSTR(MP_QSTR_wcmd),          (mp_obj_t)&py_lcd_cmd_obj     },
+	{ MP_OBJ_NEW_QSTR(MP_QSTR_wdata),     (mp_obj_t)&py_lcd_data_obj   },
+
 	{ MP_OBJ_NEW_QSTR(MP_QSTR_XY_RLUD),  MP_OBJ_NEW_SMALL_INT(DIR_XY_RLUD)}, 
     { MP_OBJ_NEW_QSTR(MP_QSTR_YX_RLUD),  MP_OBJ_NEW_SMALL_INT(DIR_YX_RLUD)}, 
 	{ MP_OBJ_NEW_QSTR(MP_QSTR_XY_LRUD),  MP_OBJ_NEW_SMALL_INT(DIR_XY_LRUD)}, 

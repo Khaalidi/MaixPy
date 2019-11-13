@@ -41,13 +41,6 @@ default_dev_address = AXP202_SLAVE_ADDRESS
 
 class PMU(object):
     def __init__(self, i2c=None, address=None, chip=None):
-        # if i2c == None:
-        #     try:
-        #         self.bus = I2C(I2C.I2C0, freq=400000, scl=30, sda=31)
-        #     except:
-        #         raise Exception("Unable to init I2C0 as Master")
-        #     else:
-        #         self.bus = i2c
         self.bus = i2c
         self.chip = chip if chip is not None else default_chip_type
         self.address = address if address else default_dev_address
@@ -56,10 +49,6 @@ class PMU(object):
         self.bytebuf = memoryview(self.buffer[0:1])
         self.wordbuf = memoryview(self.buffer[0:2])
         self.irqbuf = memoryview(self.buffer[0:5])
-
-        print('address:')
-        print(self.address)
-
 
         self.init_device()
 
@@ -94,12 +83,13 @@ class PMU(object):
         return unpack('>h', self.wordbuf)[0]
 
     def init_device(self):
-        print('* initializing mpu')
         self.chip = self.read_byte(AXP202_IC_TYPE)
         if(self.chip == AXP202_CHIP_ID):
-            print("Detect PMU Type is AXP202")
+            # print("Detect PMU Type is AXP202")
+            pass
         elif(self.chip == AXP192_CHIP_ID):
-            print("Detect PMU Type is AXP192")
+            # print("Detect PMU Type is AXP192")
+            pass
             raise Exception("No Support AXP192!")
         else:
             raise Exception("Invalid Chip ID!")
