@@ -504,6 +504,24 @@ STATIC mp_obj_t py_lcd_write_data(size_t n_args, const mp_obj_t *pos_args)
 	return mp_const_none;
 }
 
+STATIC mp_obj_t py_lcd_set_offset(size_t n_args, const mp_obj_t *pos_args)
+{
+	mp_int_t x,y ;
+	if(n_args == 2)
+	{
+		x =  mp_obj_get_int(pos_args[0]);
+		y =  mp_obj_get_int(pos_args[1]);
+		lcd_set_start_offset(x,y);
+	}else{
+		mp_raise_ValueError("Only can write one byte");
+	}
+	return mp_const_none;
+}
+
+
+
+
+
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_lcd_init_obj, 0, py_lcd_init);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(py_lcd_deinit_obj, py_lcd_deinit);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(py_lcd_width_obj, py_lcd_width);
@@ -521,6 +539,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(py_lcd_draw_string_obj, 3, 5, py_lcd_
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(py_lcd_cmd_obj, 0, 1, py_lcd_write_command);
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(py_lcd_data_obj, 0, 1, py_lcd_write_data);
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(py_lcd_set_offset_obj, 0, 2, py_lcd_set_offset);
 
 static const mp_map_elem_t globals_dict_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__),        MP_OBJ_NEW_QSTR(MP_QSTR_lcd) },
@@ -542,6 +561,7 @@ static const mp_map_elem_t globals_dict_table[] = {
 	//! low level api
 	{ MP_OBJ_NEW_QSTR(MP_QSTR_wcmd),          (mp_obj_t)&py_lcd_cmd_obj     },
 	{ MP_OBJ_NEW_QSTR(MP_QSTR_wdata),     (mp_obj_t)&py_lcd_data_obj   },
+	{ MP_OBJ_NEW_QSTR(MP_QSTR_set_offset),     (mp_obj_t)&py_lcd_set_offset_obj   },
 
 	{ MP_OBJ_NEW_QSTR(MP_QSTR_XY_RLUD),  MP_OBJ_NEW_SMALL_INT(DIR_XY_RLUD)}, 
     { MP_OBJ_NEW_QSTR(MP_QSTR_YX_RLUD),  MP_OBJ_NEW_SMALL_INT(DIR_YX_RLUD)}, 

@@ -89,5 +89,6 @@ void lcd_ram_cpyimg(char* lcd, int lcdw, char* img, int imgw, int imgh, int x, i
 
 uint16_t lcd_get_width();
 uint16_t lcd_get_height();
+void lcd_set_start_offset(int x,int y);
 #endif
 
