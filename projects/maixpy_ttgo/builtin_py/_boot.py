@@ -55,7 +55,11 @@ from machine import I2C
 import axp202
 
 i2c = I2C(I2C.I2C0, freq=400000, scl=30, sda=31)
-p = axp202.PMU(i2c,0x34)
+p = None
+try:
+    p = axp202.PMU(i2c,0x35)
+except:
+    p = axp202.PMU(i2c,0x34)
 p.setLDO2Voltage(1800)
 p.enablePower(axp202.AXP192_LDO2)
 
@@ -70,11 +74,11 @@ test_pin=16
 fpioa = FPIOA()
 fpioa.set_function(test_pin,FPIOA.GPIO7)
 test_gpio=GPIO(GPIO.GPIO7,GPIO.IN)
-lcd.init(color=(255,0,0))
+lcd.init(freq=15000000,color=(255,0,0))
 fm.register(board_info.PIN17,fm.fpioa.GPIO0)
 led=GPIO(GPIO.GPIO0,GPIO.OUT)
 led.value(1)
-lcd.rotation(2)
+lcd.rotation(1)
 lcd.clear((255,0,0))
 lcd.draw_string(lcd.width()//2-68,lcd.height()//2-4, "Welcome to MaixPy", lcd.WHITE, lcd.RED)
 if test_gpio.value() == 0:
